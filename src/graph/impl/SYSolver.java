@@ -4,7 +4,9 @@ import java.awt.Point;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -57,16 +59,29 @@ public class SYSolver
             String dstName=scan.next();
             String transportType=scan.next();
             int transportTypeInt = 0;
+            // SUPER HACK:
+            // Using weights to represent combinations of transportation types
+            // taxi only is 1
+            // bus only is 10
+            // underground only is 100
+            // taxi and bus is 11
+            // underground and taxi is 101
+            // underground and bus is 110
+            // all 3 is 111 (not sure that this ever happens)
             if (transportType.equals("T")){
                 transportTypeInt = 1;
             } else if (transportType.equals("B")){
-                transportTypeInt = 2;
+                transportTypeInt = 10;
             } else if (transportType.equals("U")){
-                transportTypeInt = 4;
+                transportTypeInt = 100;
             }
             INode src=g.getOrCreateNode(srcName);
             INode dst=g.getOrCreateNode(dstName);
-            // TODO: check for a connection here
+
+            if (src.hasEdge(dst)) {
+                int edge = src.getWeight(dst);
+                transportTypeInt += edge;
+            }
             src.addUndirectedEdgeToNode(dst, transportTypeInt);
         }
         scan.close();
@@ -123,11 +138,12 @@ public class SYSolver
     }
     
     /**
-     * Get the next 5 possible moves that Mr X could make starting
+     * Get the next 5 possible moves that X could make starting
      * at the given start node. 
      * 
      * Assume that we don't know or care about
-     * the types of transportation that Mr X is using.
+     * the types of transportation that X is using.
+     * 
      * 
      * @param g
      * @param start
@@ -135,22 +151,26 @@ public class SYSolver
      */
     public static Map<Integer, Set<String>> getNextFivePossibleMoves(IGraph g, String start)
     {
-        throw new UnsupportedOperationException("Implement this method");
+        throw new UnsupportedOperationException("implement this method");
     }
     
     /**
-     * Get the next 5 possible moves that Mr X could make starting
+     * Get the next 5 possible moves that X could make starting
      * at the given start node. 
      * 
      * Assume that that given list of transportation types tells us what
-     * type of transportation Mr X uses for each move.
+     * type of transportation X uses for each move.
      * 
      * The given list of transportTypes contains 5 strings that are either
      * "any", "taxi", "bus" or "underground". If a transport type is "any"
      * then any type of transportation can be used.
      * 
      * If the type of transportation makes a move impossible, then the set of
-     * possible locations should be empty
+     * possible locations should be empty.
+     * 
+     * The return value should have five keys: 1, 2, 3, 4, and 5.
+     * The values should be the set of locations where X could be
+     * after each move.
      * 
      * 
      * @param g
@@ -159,14 +179,11 @@ public class SYSolver
      * @return
      */
     public static Map<Integer,Set<String>> getNextFivePossibleMoves(IGraph g, String start, List<String> transportTypes) {
-        throw new UnsupportedOperationException("Implement this method");
+        throw new UnsupportedOperationException("implement this method");
     }
-    
-    
 
     private SYSolver() {
         // private constructor to prevent creating instances
         // this class exists only to hold static methods
     }
-
 }
