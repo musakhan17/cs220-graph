@@ -2,9 +2,7 @@ package mazemaker;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 import graph.IGraph;
 import graph.INode;
@@ -13,7 +11,7 @@ import graph.impl.Graph;
 
 /**
  * Pretty cool class for creating "grid graphs", which are graphs with the nodes
- * arranged on a grid of rows and columns. Perfomring a DFS on this graph creates
+ * arranged on a grid of rows and columns. Performing a DFS on this graph creates
  * a maze.
  *
  * @author jspacco
@@ -27,7 +25,7 @@ public class GridGraph
         // Nodes have edges to other nodes that are to their left or right, and
         // above or below.
         for (int r = 0; r < rows; r++){
-            for (int c=0; c < cols; c++){
+            for (int c = 0; c < cols; c++){
                 if (r > 0) {
                     INode current = graph.getOrCreateNode(String.format("r%dc%d", r, c));
                     INode other = graph.getOrCreateNode(String.format("r%dc%d", r-1, c));
@@ -78,21 +76,43 @@ public class GridGraph
         return result;
     }
 
-    public static String generateGraphVizGridGraph(IGraph g, int numRows, int numCols, String name, String start){
+    public static String generateGraphVizGridGraph(IGraph g, int numRows, int numCols, String name){
         StringBuilder result = new StringBuilder();
         result.append(String.format("graph %s {\n", name));
+
+        StringBuilder locations = new StringBuilder();
 
         for (int r=0; r<numRows; r++){
             List<String> list = new LinkedList<String>();
             for (int c=0; c<numCols; c++){
                 String label = String.format("r%dc%d", r, c);
                 list.add(label);
-                //System.out.printf("%s [\n\tlabel = %s\npos = \"%d,%d\" ];\n", label, label, r, c);
-                //rank += label + ", ";
+                locations.append(String.format("%s [\n\tlabel = %s\npos = \"%d,%d\" ];\n", label, label, r, c));
             }
             String rank = String.join(", ", list);
             // remove last comma
             result.append(String.format("{ rank=same; %s }\n", rank));
+        }
+        //result.append(locations);
+        // TODO: generate edges
+        Set<String> done = new HashSet<>();
+        for (INode node : g.getAllNodes()){
+            for (INode n : node.getNeighbors()){
+                String srcName = node.getName();
+                String dstName = n.getName();
+                if (dstName.compareTo(srcName) < 0){
+                    String tmp = srcName;
+                    srcName = dstName;
+                    dstName = tmp;
+                }
+                String key = srcName + "--" + dstName;
+                if (done.contains(key)){
+                    continue;
+                }
+                done.add(key);
+                result.append(String.format("%s -- %s;\n", srcName, dstName));
+                //result.append("%s [\n\tlabel = %s\npos = \"%d,%d\" ];\n", label, label, r, c);
+            }
         }
 
         result.append("}");
@@ -113,14 +133,16 @@ public class GridGraph
     public static void main(String[] args){
         int rows = 5;
         int cols = 5;
-        
+
         IGraph g = makeGridGraph(rows, cols);
+
+        writeToFile("files/grid.dot", generateGraphVizGridGraph(g, rows, cols, "grid1"));
 
         // r0c0 is always the top-left node
         // but we could make the start any node on the edges
         IGraph maze = createMaze(g, "r0c0");
 
-        String graphviz = generateGraphVizGridGraph(maze, rows, cols, "maze1", "r0c0");
+        String graphviz = generateGraphVizGridGraph(maze, rows, cols, "maze1");
 
         writeToFile("files/maze.dot", graphviz);
     }
