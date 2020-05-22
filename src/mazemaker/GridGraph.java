@@ -136,59 +136,17 @@ public class GridGraph
 
         IGraph g = makeGridGraph(rows, cols);
 
+        // this is the full grid graph
+        // note that we need to view this in graphviz with "osage" as the engine
         writeToFile("files/grid.dot", generateGraphVizGridGraph(g, rows, cols, "grid1"));
 
         // r0c0 is always the top-left node
         // but we could make the start any node on the edges
         IGraph maze = createMaze(g, "r0c0");
 
+        // note that we need to view this with "osage" as teh engine
         String graphviz = generateGraphVizGridGraph(maze, rows, cols, "maze1");
 
         writeToFile("files/maze.dot", graphviz);
     }
-
-    public static void main2(String[] args){
-        int rows = 5;
-        int cols = 5;
-
-        IGraph g = makeGridGraph(rows, cols);
-
-        // This code generates a maze with the given number of rows and cols
-        // using DFS, and prints it out in Graphviz format.
-        System.out.printf("graph gr {\n");
-
-
-        g.depthFirstSearch("r0c0", new NodeVisitor() {
-            Stack<INode> nodes = new Stack<INode>();
-            @Override
-            public void visit(INode node) {
-                // Go through the stack of nodes we've already seen,
-                // and connect to it.
-                for (INode n : nodes){
-                    if (node.hasEdge(n)){
-                        System.out.printf("%s -- %s;\n", n.getName(), node.getName());
-                        break;
-                    }
-                }
-                nodes.push(node);
-            }
-        });
-
-        // This creates a bunch of "rank=same" directives that tell graphviz to lay out
-        // the graph a certain way.
-        for (int r=0; r<rows; r++){
-            String rank = "";
-            for (int c=0; c<cols; c++){
-                String label = String.format("r%dc%d", r, c);
-                //System.out.printf("%s [\n\tlabel = %s\npos = \"%d,%d\" ];\n", label, label, r, c);
-                rank += label + ", ";
-            }
-            // remove last comma
-            rank = rank.substring(0, rank.length()-2);
-            System.out.printf("{ rank=same; %s }\n", rank);
-        }
-
-        System.out.printf("}\n");
-    }
-
 }
