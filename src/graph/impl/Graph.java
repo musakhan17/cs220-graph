@@ -1,8 +1,14 @@
 package graph.impl;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 import graph.IGraph;
 import graph.INode;
@@ -72,8 +78,27 @@ public class Graph implements IGraph
      */
     public void breadthFirstSearch(String startNodeName, NodeVisitor v)
     {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Implement this method");
+    	Set<INode> visited = new HashSet<>();
+    	LinkedList<INode> queue = new LinkedList<INode>(); 
+
+    	queue.offer(getOrCreateNode(startNodeName));
+    	visited.add(hmap.get(startNodeName));
+    	while (queue.size() != 0) 
+    	{
+    		INode x = queue.poll(); 
+    		Collection<INode> c = x.getNeighbors();
+    		Iterator<INode> i = c.iterator(); 
+    		while (i.hasNext()) 
+    		{ 
+    			INode n = i.next(); 
+    			if (!queue.contains(n)) 
+    			{
+    				queue.add(n);
+    				visited.add(n);
+    				v.visit(n);
+    			}
+    		}
+    	}
     }
 
     /**
@@ -87,8 +112,27 @@ public class Graph implements IGraph
      */
     public void depthFirstSearch(String startNodeName, NodeVisitor v)
     {
-        // TODO: implement this method
-        throw new UnsupportedOperationException("Implement this method");
+    	Set<INode> visited = new HashSet<>();
+    	LinkedList<INode> queue = new LinkedList<INode>(); 
+
+    	queue.push(getOrCreateNode(startNodeName));
+    	visited.add(hmap.get(startNodeName));
+    	while (queue.size() != 0) 
+    	{
+    		INode x = queue.pop(); 
+    		Collection<INode> c = x.getNeighbors();
+    		Iterator<INode> i = c.iterator(); 
+    		while (i.hasNext()) 
+    		{ 
+    			INode n = i.next(); 
+    			if (!queue.contains(n)) 
+    			{
+    				queue.add(n);
+    				visited.add(n);
+    				v.visit(n);
+    			}
+    		}
+    	}
     }
 
     /**
@@ -105,8 +149,23 @@ public class Graph implements IGraph
      * @return
      */
     public Map<INode,Integer> dijkstra(String startName) {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Implement this method");
+    	
+    	Map<INode,Integer> fin = new HashMap<>();
+        PriorityQueue<Path> queue = new PriorityQueue<>();
+        queue.add(new Path(getOrCreateNode(startName),0));
+        
+        while ( fin.size() < getAllNodes().size()) {
+        	Path n = queue.poll();
+        	INode Node1 = n.name;
+        	if (fin.containsKey(Node1))
+        		continue;
+        	int cost = n.cost;
+        	fin.put(Node1, cost);
+        	for(INode temp : Node1.getNeighbors()) {
+        		queue.add(new Path(temp, Node1.getWeight(temp)+cost));
+        	}	
+        }
+        return fin;
     }
     
     /**
@@ -118,7 +177,27 @@ public class Graph implements IGraph
      * @return
      */
     public IGraph primJarnik() {
-        //TODO Implement this method
-        throw new UnsupportedOperationException();
+    	IGraph f = new Graph();
+		INode initiate = (INode) this.getAllNodes().toArray()[0]; //Thanks to Choudry
+		PriorityQueue<edge> queue = new PriorityQueue<>();
+		for(INode temp : initiate.getNeighbors()) {
+			qu.add(new edge(initiate,temp, initiate.getWeight(temp)));
+		}
+		while(f.getAllNodes().size()!=this.getAllNodes().size()) {
+			edge e = queue.poll();
+			INode node1 = e.n1;
+			INode node2 = e.n2;
+			if(f.containsNode(node1.getName()) && f.containsNode(node2.getName()))
+				continue;
+			INode x = f.getOrCreateNode(node1.getName());
+			INode y = f.getOrCreateNode(node2.getName());
+			x.addUndirectedEdgeToNode(y,e.weight);
+			for(INode temp : node2.getNeighbors()) {
+        		if (!temp.equals(node1)) {
+        		queue.add(new edge(node2,temp,node2.getWeight(temp)));
+        		}
+        	}
+		}
+		return f;
     }
 }
