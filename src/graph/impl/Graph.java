@@ -1,6 +1,5 @@
 package graph.impl;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -152,21 +151,23 @@ public class Graph implements IGraph
     	
     	Map<INode,Integer> fin = new HashMap<>();
         PriorityQueue<Path> queue = new PriorityQueue<>();
-        queue.add(new Path(getOrCreateNode(startName),0));
+        queue.add(new Path(getOrCreateNode(startName), 0));
         
         while ( fin.size() < getAllNodes().size()) {
         	Path n = queue.poll();
         	INode Node1 = n.name;
         	if (fin.containsKey(Node1))
         		continue;
-        	int cost = n.cost;
-        	fin.put(Node1, cost);
+        	int weight = n.weight;
+        	fin.put(Node1, weight);
         	for(INode temp : Node1.getNeighbors()) {
-        		queue.add(new Path(temp, Node1.getWeight(temp)+cost));
+        		queue.add(new Path(temp, Node1.getWeight(temp)+weight));
         	}	
         }
         return fin;
     }
+    
+    
     
     /**
      * Perform Prim-Jarnik's algorithm to compute a Minimum Spanning Tree (MST).
@@ -178,10 +179,10 @@ public class Graph implements IGraph
      */
     public IGraph primJarnik() {
     	IGraph f = new Graph();
-		INode initiate = (INode) this.getAllNodes().toArray()[0]; //Thanks to Choudry
+		INode initiate = (INode) this.getAllNodes().toArray()[0];
 		PriorityQueue<edge> queue = new PriorityQueue<>();
 		for(INode temp : initiate.getNeighbors()) {
-			qu.add(new edge(initiate,temp, initiate.getWeight(temp)));
+			queue.add(new edge(initiate,temp, initiate.getWeight(temp)));
 		}
 		while(f.getAllNodes().size()!=this.getAllNodes().size()) {
 			edge e = queue.poll();
